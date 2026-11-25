@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,7 +23,11 @@ class CreateRecruiter extends Command
         $validator = Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:12', 'max:72'],
+            'password' => ['bail', 'required', 'string', 'min:12', static function (string $attribute, string $value, Closure $fail): void {
+                if (strlen($value) > 72) {
+                    $fail('A senha deve ter até 72 bytes.');
+                }
+            }],
         ]);
         if ($validator->fails()) {
             $this->error($validator->errors()->first());

@@ -10,3 +10,7 @@ storage/framework/views/*.php
 storage/framework/sessions/*
 bootstrap/cache/*.php
 .codex
+auth.json
+storage/*.key
+storage/app/private/*
+.phpunit.result.cache

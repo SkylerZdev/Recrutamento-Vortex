@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CandidateRequest;
 use App\Models\Candidate;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -24,7 +26,7 @@ class CandidateController extends Controller
 
     public function store(CandidateRequest $request): RedirectResponse|JsonResponse
     {
-        return $this->saved($request, Candidate::create($request->validated()), 'candidatos', 201);
+        return $this->saveCandidate($request, new Candidate);
     }
 
     public function show(Request $request, Candidate $candidate): View|JsonResponse
@@ -44,9 +46,21 @@ class CandidateController extends Controller
 
     public function update(CandidateRequest $request, Candidate $candidate): RedirectResponse|JsonResponse
     {
-        $candidate->update($request->validated());
+        return $this->saveCandidate($request, $candidate);
+    }
 
-        return $this->saved($request, $candidate, 'candidatos');
+    private function saveCandidate(CandidateRequest $request, Candidate $candidate): RedirectResponse|JsonResponse
+    {
+        try {
+            $candidate->fill($request->validated())->save();
+        } catch (UniqueConstraintViolationException $exception) {
+            if (! Candidate::where('email', $candidate->email)->exists()) {
+                throw $exception;
+            }
+            throw ValidationException::withMessages(['email' => 'Este e-mail já está cadastrado.']);
+        }
+
+        return $this->saved($request, $candidate, 'candidatos', $candidate->wasRecentlyCreated ? 201 : 200);
     }
 
     public function destroy(Request $request, Candidate $candidate): Response

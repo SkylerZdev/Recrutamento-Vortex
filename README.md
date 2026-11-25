@@ -8,14 +8,14 @@ Requisitos: PHP 8.5 com PDO SQLite, mbstring e extensões exigidas pelo Composer
 
 ```sh
 composer install
-php -r "copy('.env.example', '.env'); touch('database/database.sqlite');"
+php -r "file_exists('.env') || copy('.env.example', '.env'); file_exists('database/database.sqlite') || touch('database/database.sqlite');"
 php artisan key:generate
 php artisan migrate --seed
 php artisan recrutamento:usuario
 php artisan serve
 ```
 
-Abra [localhost:8000](http://localhost:8000) e entre com a conta criada no comando interativo. A senha deve ter pelo menos 12 caracteres. Em uma instalação existente, preserve o arquivo `.env` e a chave atual. Os arquivos de CSS e JavaScript são servidos diretamente de `public/`.
+Abra [localhost:8000](http://localhost:8000) e entre com a conta criada no comando interativo. A senha deve ter pelo menos 12 caracteres e até 72 bytes. Em uma instalação existente, preserve o arquivo `.env` e a chave atual. Os arquivos de CSS e JavaScript são servidos diretamente de `public/`.
 
 ## Executar com Docker e PostgreSQL
 
@@ -63,7 +63,7 @@ curl -u "seu-email@example.org" "http://localhost:8000/api/vagas?paused=0&contra
 
 Envie corpos JSON com `Content-Type: application/json`. Para criar uma vaga, envie `title`, `description` e `contract` (valores exatos: `CLT`, `Pessoa Jurídica`, `Freelancer`). O booleano `paused` é opcional e inicia falso. Para criar um candidato, envie `name` e `email`.
 
-As listas aceitam esses campos na query string, além de `id`, `created_at`, `updated_at` (datas no formato `AAAA-MM-DD`), `page` e `per_page`. Use `paused=0` ou `paused=1`. A resposta traz `data`, `total`, `current_page`, `per_page` e links de navegação. Criações retornam 201, exclusões 204 e erros de validação 422. A inscrição usa transação e bloqueio da vaga no PostgreSQL. Uma chave primária composta impede inscrições duplicadas.
+As listas aceitam esses campos na query string, além de `id`, `created_at`, `updated_at` (datas no formato `AAAA-MM-DD`), `page` e `per_page`. Use `paused=0` ou `paused=1`. Os filtros de texto buscam trechos literais, inclusive sinais de porcentagem e sublinhados. A resposta traz `data`, `total`, `current_page`, `per_page` e links de navegação. Criações retornam 201, exclusões 204 e erros de validação 422. A inscrição usa transação e bloqueio da vaga no PostgreSQL. Uma chave primária composta impede inscrições duplicadas.
 
 ## Testes
 

@@ -101,4 +101,63 @@ class RecruitmentTest extends TestCase
         $this->deleteJson('/api/candidatos/lote', ['ids' => [$other->id]])->assertNoContent();
         $this->assertModelExists($candidate);
     }
+
+    public function test_each_field_filters_independently(): void
+    {
+        $this->withBasicAuth(User::factory()->create()->email, 'password');
+        $description = str_repeat('Experiência em PHP. ', 18).'Remoto';
+        $dates = ['created_at' => '2025-02-10', 'updated_at' => '2025-03-20'];
+        $vacancy = Vacancy::factory()->create($dates + ['title' => 'Dev_100%!', 'description' => $description, 'contract' => 'CLT', 'paused' => true]);
+        Vacancy::factory()->create(['title' => 'DevX1000!', 'description' => 'Presencial', 'contract' => 'Freelancer']);
+        $candidate = Candidate::factory()->create($dates + ['name' => 'Ana', 'email' => 'ana_dev@example.org']);
+        Candidate::factory()->create(['name' => 'Bia', 'email' => 'anaxdev@example.org']);
+
+        foreach ([
+            ['vagas', $vacancy, $dates + ['id' => $vacancy->id, 'title' => 'Dev_100%!', 'description' => $description, 'contract' => 'CLT', 'paused' => 1]],
+            ['candidatos', $candidate, $dates + ['id' => $candidate->id, 'name' => 'Ana', 'email' => 'ana_dev']],
+        ] as [$section, $record, $filters]) {
+            foreach ($filters as $field => $value) {
+                $this->getJson('/api/'.$section.'?'.http_build_query([$field => $value]))
+                    ->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.id', $record->id);
+            }
+        }
+    }
+
+    public function test_invalid_record_ids_and_missing_candidates(): void
+    {
+        $this->withBasicAuth(User::factory()->create()->email, 'password');
+        foreach (['vagas', 'candidatos'] as $section) {
+            foreach (['inexistente', '999999999999999999999', '123'] as $id) {
+                $this->getJson('/api/'.$section.'/'.$id)->assertNotFound();
+            }
+        }
+        $vacancy = Vacancy::factory()->create();
+        $this->postJson('/api/vagas/'.$vacancy->id.'/inscricoes', ['email' => 'ausente@example.org'])
+            ->assertUnprocessable()->assertJsonValidationErrors('email');
+        $this->assertDatabaseCount('candidate_vacancy', 0);
+    }
+
+    public function test_recruiter_password_limit_counts_bytes(): void
+    {
+        $this->artisan('recrutamento:usuario')
+            ->expectsQuestion('Nome', 'Recrutador')
+            ->expectsQuestion('E-mail', 'recrutador@example.org')
+            ->expectsQuestion('Senha (mínimo de 12 caracteres)', str_repeat('á', 37))
+            ->expectsOutput('A senha deve ter até 72 bytes.')
+            ->assertFailed();
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    public function test_api_and_login_have_independent_rate_limits(): void
+    {
+        for ($attempt = 0; $attempt < 6; $attempt++) {
+            $this->getJson('/api/vagas')->assertUnauthorized();
+        }
+        $credentials = ['email' => 'ausente@example.org', 'password' => 'incorreta'];
+        for ($attempt = 0; $attempt < 6; $attempt++) {
+            $this->post('/entrar', $credentials)->assertRedirect()->assertSessionHasErrors('email');
+        }
+        $this->post('/entrar', $credentials)->assertTooManyRequests();
+        $this->getJson('/api/vagas')->assertUnauthorized();
+    }
 }

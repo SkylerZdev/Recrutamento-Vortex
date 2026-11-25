@@ -22,7 +22,11 @@ abstract class Controller
             'per_page' => ['nullable', 'integer', 'between:1,100'],
         ];
         foreach ($fields as $field) {
-            $rules[$field] = $field === 'paused' ? ['nullable', 'boolean'] : ['nullable', 'string', 'max:255'];
+            $rules[$field] = match ($field) {
+                'paused' => ['nullable', 'boolean'],
+                'description' => ['nullable', 'string', 'max:10000'],
+                default => ['nullable', 'string', 'max:255'],
+            };
         }
         $filters = $request->validate($rules);
         foreach ($filters as $field => $value) {
@@ -34,7 +38,9 @@ abstract class Controller
             } elseif (in_array($field, ['id', 'contract', 'paused'], true)) {
                 $query->where($field, $value);
             } else {
-                $query->whereLike($field, '%'.$value.'%');
+                $text = strtr($value, ['!' => '!!', '%' => '!%', '_' => '!_']);
+                $column = $query->getQuery()->getGrammar()->wrap($field);
+                $query->whereRaw("lower({$column}) like lower(?) escape '!'", ['%'.$text.'%']);
             }
         }
         $records = $query->orderByDesc('id')->paginate($filters['per_page'] ?? 20)->withQueryString();
