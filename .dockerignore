@@ -1,6 +1,7 @@
 .git
 .env
 .env.*
+!.env.testing
 vendor
 node_modules
 database/*.sqlite*

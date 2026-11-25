@@ -17,7 +17,7 @@ class RecruitmentTest extends TestCase
         $this->followingRedirects()->get('/')->assertOk()->assertSee('Senha');
         $this->getJson('/api/vagas')->assertUnauthorized();
         $user = User::factory()->create();
-        $this->post('/entrar', ['email' => $user->email, 'password' => 'wrong'])->assertSessionHasErrors('email');
+        $this->post('/entrar', ['email' => $user->email, 'password' => 'wrong'])->assertRedirect('/entrar')->assertSessionHasErrors('email');
         $this->post('/entrar', ['email' => $user->email, 'password' => 'password'])->assertRedirect('/vagas');
         $this->assertAuthenticatedAs($user);
         $this->post('/sair')->assertRedirect('/entrar');
@@ -35,7 +35,7 @@ class RecruitmentTest extends TestCase
         ] as [$section, $model, $data, $changes]) {
             $url = '/'.$section;
             $this->get($url.'/create')->assertOk()->assertSee('Salvar');
-            $this->post($url, [])->assertSessionHasErrors(array_keys($data));
+            $this->post($url, [])->assertRedirect($url.'/create')->assertSessionHasErrors(array_keys($data));
             $this->post($url, $data)->assertSessionHasNoErrors();
             $record = $model::firstOrFail();
             $detail = $url.'/'.$record->id;
