@@ -1,0 +1,52 @@
+* { box-sizing: border-box }
+:root { font-family: Inter, system-ui, sans-serif; color: #172e32; background: #f4f7f5; line-height: 1.5 }
+body { margin: 0 }
+.shell { width: min(1120px, 92%); margin: auto }
+main.shell { padding: 44px 0 64px }
+.bar { background: #143b3c; color: white }
+.nav, .nav nav, .actions, .tools, .heading, footer, .pages { display: flex; align-items: center; gap: 18px }
+.nav { min-height: 66px; gap: 40px }
+.nav a { color: #e0ede8; text-decoration: none }
+.nav a[aria-current] { color: white; text-decoration: underline; text-underline-offset: 8px }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 23px; font-weight: 750; letter-spacing: -.04em }
+.brand span { color: #163d3e; background: #b9ead2; width: 30px; text-align: center; border-radius: 8px; font-size: 21px }
+.end { margin-left: auto }
+.eyebrow { text-transform: uppercase; letter-spacing: .15em; font-size: 11px; font-weight: 750; color: #477469; margin: 0 }
+h1 { font-size: clamp(30px, 4vw, 46px); line-height: 1.15; letter-spacing: -.045em; margin: 10px 0 24px; overflow-wrap: anywhere }
+h2 { font-size: 21px; margin-top: 0 }
+.heading, .tools, footer { justify-content: space-between; flex-wrap: wrap }
+.panel { border: 1px solid #d6e0dc; border-radius: 14px; background: white; overflow: hidden }
+.info, .stack { padding: 26px; margin-bottom: 18px }
+.stack, label { display: grid; gap: 6px }
+.stack { gap: 18px }
+label { font-weight: 600; font-size: 14px }
+.login { max-width: 420px; margin: 6vh auto }
+.login form { padding: 0; margin: 0 }
+.form { max-width: 700px }
+a { color: #116151; font-weight: 600 }
+button, .button, input, select, textarea { font: inherit; border: 1px solid #bccdc8; border-radius: 7px; background: white; color: inherit; padding: 8px 12px }
+button, .button { font-weight: 600; cursor: pointer; text-decoration: none }
+.primary { background: #176655; border-color: #176655; color: white }
+.quiet { background: transparent; border-color: #638485 }
+.danger { color: #963d35; font-size: 14px }
+button:disabled { opacity: .5; cursor: default }
+details, .tools, footer { padding: 16px 20px }
+summary { cursor: pointer; font-weight: 650 }
+.filters { display: grid; grid-template-columns: repeat(auto-fit,minmax(155px,1fr)); gap: 12px; align-items: end; margin-top: 16px }
+input, select, textarea { min-width: 0; max-width: 100% }
+.tools { border-block: 1px solid #e3e9e7 }
+.tools label { display: inline }
+.small { width: 72px }
+.actions { flex-wrap: wrap; align-items: end; gap: 12px }
+.scroll { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; font-size: 14px }
+th, td { text-align: left; padding: 14px; border-bottom: 1px solid #e3e9e7 }
+th { background: #f5f8f6; font-size: 12px; color: #4b695f }
+td a { text-decoration: none }
+a:hover { text-decoration: underline }
+.pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: #d9f0e1; color: #245840 }
+.paused { background: #ffedc8; color: #774d15 }
+.description { white-space: pre-line; overflow-wrap: anywhere }
+.notice, .error { padding: 14px 18px; border-radius: 7px; background: #d9f0e1 }
+.error { background: #fae3df }
+@media(max-width: 600px) { .nav { gap: 14px } .nav nav { gap: 10px } .heading { margin-bottom: 16px } .actions { gap: 8px } }

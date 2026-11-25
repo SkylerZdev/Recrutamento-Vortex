@@ -1,0 +1,37 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      APP_KEY: ${APP_KEY:?Defina APP_KEY no .env}
+      APP_ENV: local
+      APP_LOCALE: pt_BR
+      APP_FAKER_LOCALE: pt_BR
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: recrutamento
+      DB_USERNAME: recrutamento
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      SESSION_DRIVER: database
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: recrutamento
+      POSTGRES_USER: recrutamento
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recrutamento -d recrutamento"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+volumes:
+  pgdata:

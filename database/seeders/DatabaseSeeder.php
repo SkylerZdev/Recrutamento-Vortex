@@ -2,24 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Candidate;
+use App\Models\Vacancy;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $open = Vacancy::factory(22)->create();
+        Vacancy::factory(4)->create(['paused' => true]);
+        Candidate::factory(32)->create()->each(function (Candidate $candidate) use ($open) {
+            $candidate->vacancies()->attach($open->random(2)->modelKeys());
+        });
     }
 }
